@@ -14,6 +14,64 @@ datasource db {
 }
 
 model User {
-  id   String  @id @default(cuid())
-  name String?
+  id                        String  @id @default(cuid())
+  email                     String  @unique
+  name                      String
+  currentHashedRefreshToken String?
+}
+
+enum Class {
+  Warrior
+  Paladin
+  Hunter
+  Rogue
+  Priest
+  Shaman
+  Mage
+  Warlock
+  Monk
+  Druid
+  DemonHunter
+  DeathKnight
+  Evoker
+}
+
+enum Role {
+  Tank
+  Healer
+  Damage
+}
+
+model Character {
+  id                     String                   @id @default(cuid())
+  name                   String
+  class                  Class
+  role                   Role
+  RaidContribution       RaidContribution[]
+  SuicideKingList        SuicideKingList[]
+  SuicideKingListHistory SuicideKingListHistory[]
+}
+
+model RaidContribution {
+  id          String    @id @default(cuid())
+  character   Character @relation(fields: [characterId], references: [id])
+  date        DateTime
+  amount      Int
+  characterId String
+}
+
+model SuicideKingList {
+  characterId String    @id @default(cuid())
+  character   Character @relation(fields: [characterId], references: [id])
+  rank        Int?
+  tSetRank    Int?
+}
+
+model SuicideKingListHistory {
+  characterId String    @id @default(cuid())
+  character   Character @relation(fields: [characterId], references: [id])
+  rank        Int
+  tSetRank    Int
+  timestamp   DateTime
+  item        String?
 }

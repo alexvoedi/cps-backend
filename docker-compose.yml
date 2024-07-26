@@ -16,14 +16,22 @@ services:
     ports:
       - 8080:8080
 
-  api:
-    build:
-      context: .
-      dockerfile: Dockerfile
+  # api:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   restart: always
+  #   env_file:
+  #     - .env
+  #   ports:
+  #     - 3001:3000
+  #   depends_on:
+  #     - db
+
+  prismaliser:
+    image: ghcr.io/ovyerus/prismaliser
     restart: always
     env_file:
       - .env
     ports:
-      - 3001:3000
-    depends_on:
-      - db
+      - 3333:3000

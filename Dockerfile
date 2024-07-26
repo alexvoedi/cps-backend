@@ -1,4 +1,4 @@
-FROM node:22-slim AS base
+FROM node:22-alpine AS base
 
 USER root
 
@@ -29,7 +29,7 @@ RUN pnpm run build
 
 # ---
 
-FROM base
+FROM base AS prod
 
 COPY --from=prod-deps /app/node_modules /app/node_modules
 COPY --from=build /app/dist /app/dist
