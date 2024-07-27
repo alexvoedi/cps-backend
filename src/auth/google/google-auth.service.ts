@@ -84,7 +84,6 @@ export class GoogleAuthService {
   }
 
   async signOut(token: string) {
-    console.log(token)
     const userId = await this.authService.getUserIdFromToken(token)
 
     await this.userService.removeRefreshToken(userId)

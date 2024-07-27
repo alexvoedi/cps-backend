@@ -13,14 +13,22 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id                        String  @id @default(cuid())
-  email                     String  @unique
-  name                      String
-  currentHashedRefreshToken String?
+enum UserRole {
+  Member
+  RaidLead
+  GuildLead
+  Admin
 }
 
-enum Class {
+model User {
+  id                        String   @id @default(cuid())
+  email                     String   @unique
+  name                      String
+  currentHashedRefreshToken String?
+  role                      UserRole
+}
+
+enum CharacterClass {
   Warrior
   Paladin
   Hunter
@@ -36,7 +44,7 @@ enum Class {
   Evoker
 }
 
-enum Role {
+enum CharacterRole {
   Tank
   Healer
   Damage
@@ -45,8 +53,8 @@ enum Role {
 model Character {
   id                     String                   @id @default(cuid())
   name                   String
-  class                  Class
-  role                   Role
+  class                  CharacterClass
+  role                   CharacterRole
   RaidContribution       RaidContribution[]
   SuicideKingList        SuicideKingList[]
   SuicideKingListHistory SuicideKingListHistory[]
