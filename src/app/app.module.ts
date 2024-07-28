@@ -1,10 +1,9 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
 import { AuthModule } from 'src/auth/auth.module';
 import { GoogleAuthModule } from 'src/auth/google/google-auth.module';
+import { HealthModule } from 'src/health/health.module';
 
 @Module({
   imports: [
@@ -22,10 +21,11 @@ import { GoogleAuthModule } from 'src/auth/google/google-auth.module';
       })
     }),
 
+    HealthModule,
     AuthModule,
     GoogleAuthModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule { }
