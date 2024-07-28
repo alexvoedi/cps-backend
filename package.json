@@ -1,7 +1,7 @@
 {
   "name": "@alexvoedi/cps-backend",
   "version": "0.0.1",
-  "description": "A backend for the cPS World of Warcraft guild website",
+  "description": "A backend for the CPS World of Warcraft guild website",
   "private": true,
   "license": "UNLICENSED",
   "repository": {
@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@fastify/cookie": "^9.3.1",
+    "@nestjs-modules/mailer": "^2.0.2",
     "@nestjs/axios": "^3.0.2",
     "@nestjs/common": "^10.3.10",
     "@nestjs/config": "^3.2.3",
@@ -43,6 +44,7 @@
     "class-validator": "^0.14.1",
     "googleapis": "^140.0.1",
     "joi": "^17.13.3",
+    "nodemailer": "^6.9.14",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
   },
@@ -56,6 +58,7 @@
     "@types/express": "^4.17.21",
     "@types/jest": "^29.5.12",
     "@types/node": "^20.14.12",
+    "@types/nodemailer": "^6.4.15",
     "@types/supertest": "^6.0.2",
     "@typescript-eslint/eslint-plugin": "^7.17.0",
     "@typescript-eslint/parser": "^7.17.0",

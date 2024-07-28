@@ -1,9 +1,9 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import { User } from "@prisma/client";
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { User } from '@prisma/client';
 import { google, Auth } from 'googleapis';
-import { AuthService } from "src/auth/auth.service";
-import { UserService } from "src/user/user.service";
+import { AuthService } from 'src/auth/auth.service';
+import { UserService } from 'src/user/user.service';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -16,7 +16,9 @@ export class GoogleAuthService {
     private readonly authService: AuthService,
   ) {
     const clientId = this.configService.get<string>('GOOGLE_AUTH_CLIENT_ID');
-    const clientSecret = this.configService.get<string>('GOOGLE_AUTH_CLIENT_SECRET');
+    const clientSecret = this.configService.get<string>(
+      'GOOGLE_AUTH_CLIENT_SECRET',
+    );
 
     this.oauthClient = new google.auth.OAuth2(clientId, clientSecret);
   }
@@ -24,42 +26,40 @@ export class GoogleAuthService {
   async authenticate(token: string) {
     const tokenInfo = await this.oauthClient.getTokenInfo(token);
 
-    const { email } = tokenInfo
+    const { email } = tokenInfo;
 
-    const user = await this.userService.user({ email })
+    const user = await this.userService.getUser({ email });
 
     if (!user) {
-      return this.registerUser(token, email)
+      return this.registerUser(token, email);
     }
 
-    return this.handleRegisteredUser(user)
+    return this.handleRegisteredUser(user);
   }
 
   async verify(refreshToken: string) {
-    const user = this.authService.getUserFromToken(refreshToken)
+    const user = this.authService.getUserFromToken(refreshToken);
 
     if (!user) {
-      throw new UnauthorizedException('User not registered')
+      throw new UnauthorizedException('User not registered');
     }
 
-    return user
+    return user;
   }
 
   async handleRegisteredUser(user: User) {
     if (!user) {
-      throw new UnauthorizedException('User not registered')
+      throw new UnauthorizedException('User not registered');
     }
 
-    const {
-      accessTokenCookie,
-      refreshTokenCookie,
-    } = await this.authService.getCookiesForUser(user)
+    const { accessTokenCookie, refreshTokenCookie } =
+      await this.authService.getCookiesForUser(user);
 
     return {
       user,
       accessTokenCookie,
-      refreshTokenCookie
-    }
+      refreshTokenCookie,
+    };
   }
 
   async registerUser(token: string, email: string) {
@@ -67,27 +67,27 @@ export class GoogleAuthService {
 
     const user = await this.userService.createUser({
       email,
-      name
-    })
+      name,
+    });
 
-    return this.handleRegisteredUser(user)
+    return this.handleRegisteredUser(user);
   }
 
   async getUserData(token: string) {
-    const { userinfo } = google.oauth2('v2')
+    const { userinfo } = google.oauth2('v2');
 
-    this.oauthClient.setCredentials({ access_token: token })
+    this.oauthClient.setCredentials({ access_token: token });
 
-    const { data } = await userinfo.get({ auth: this.oauthClient })
+    const { data } = await userinfo.get({ auth: this.oauthClient });
 
-    return data
+    return data;
   }
 
   async signOut(token: string) {
-    const userId = await this.authService.getUserIdFromToken(token)
+    const userId = await this.authService.getUserIdFromToken(token);
 
-    await this.userService.removeRefreshToken(userId)
+    await this.userService.removeRefreshToken(userId);
 
-    return this.authService.clearCookie()
+    return this.authService.clearCookie();
   }
 }

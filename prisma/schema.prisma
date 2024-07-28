@@ -14,6 +14,7 @@ datasource db {
 }
 
 enum UserRole {
+  Guest
   Member
   RaidLead
   GuildLead
@@ -24,8 +25,11 @@ model User {
   id                        String   @id @default(cuid())
   email                     String   @unique
   name                      String
+  role                      UserRole @default(Guest)
   currentHashedRefreshToken String?
-  role                      UserRole
+  hashedPassword            String?
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
 }
 
 enum CharacterClass {
@@ -54,7 +58,7 @@ model Character {
   id                     String                   @id @default(cuid())
   name                   String
   class                  CharacterClass
-  role                   CharacterRole
+  roles                  CharacterRole[]
   RaidContribution       RaidContribution[]
   SuicideKingList        SuicideKingList[]
   SuicideKingListHistory SuicideKingListHistory[]

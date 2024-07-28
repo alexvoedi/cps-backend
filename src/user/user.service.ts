@@ -2,12 +2,18 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { User, Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { MailerService } from '@nestjs-modules/mailer';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService) { }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly configService: ConfigService,
+    private readonly mailService: MailerService,
+  ) {}
 
-  async user(
+  async getUser(
     userWhereUniqueInput: Prisma.UserWhereUniqueInput,
   ): Promise<User | null> {
     return this.prisma.user.findUnique({
@@ -15,7 +21,7 @@ export class UserService {
     });
   }
 
-  async users(params: {
+  async getUsers(params: {
     skip?: number;
     take?: number;
     cursor?: Prisma.UserWhereUniqueInput;
@@ -33,9 +39,18 @@ export class UserService {
   }
 
   async createUser(data: Prisma.UserCreateInput): Promise<User> {
-    return this.prisma.user.create({
+    const newUser = this.prisma.user.create({
       data,
     });
+
+    this.mailService.sendMail({
+      from: 'CPS Website',
+      to: 'voedisch.alexander@gmail.com',
+      subject: 'Neuer Nutzer | CPS',
+      text: `Ein neuer Nutzer hat sich auf der CPS Webseite registriert. Besuche jetzt ${this.configService.get('FRONTEND_URL')} um dem Nutzer eine Rolle zuzuweisen.`,
+    });
+
+    return newUser;
   }
 
   async updateUser(params: {

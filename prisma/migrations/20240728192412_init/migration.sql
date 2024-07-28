@@ -1,15 +1,22 @@
 -- CreateEnum
-CREATE TYPE "Class" AS ENUM ('Warrior', 'Paladin', 'Hunter', 'Rogue', 'Priest', 'Shaman', 'Mage', 'Warlock', 'Monk', 'Druid', 'DemonHunter', 'DeathKnight', 'Evoker');
+CREATE TYPE "UserRole" AS ENUM ('Guest', 'Member', 'RaidLead', 'GuildLead', 'Admin');
 
 -- CreateEnum
-CREATE TYPE "Role" AS ENUM ('Tank', 'Healer', 'Damage');
+CREATE TYPE "CharacterClass" AS ENUM ('Warrior', 'Paladin', 'Hunter', 'Rogue', 'Priest', 'Shaman', 'Mage', 'Warlock', 'Monk', 'Druid', 'DemonHunter', 'DeathKnight', 'Evoker');
+
+-- CreateEnum
+CREATE TYPE "CharacterRole" AS ENUM ('Tank', 'Healer', 'Damage');
 
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "name" TEXT NOT NULL,
+    "role" "UserRole" NOT NULL DEFAULT 'Guest',
     "currentHashedRefreshToken" TEXT,
+    "hashedPassword" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -18,8 +25,8 @@ CREATE TABLE "User" (
 CREATE TABLE "Character" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "class" "Class" NOT NULL,
-    "role" "Role" NOT NULL,
+    "class" "CharacterClass" NOT NULL,
+    "roles" "CharacterRole"[],
 
     CONSTRAINT "Character_pkey" PRIMARY KEY ("id")
 );
