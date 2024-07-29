@@ -36,7 +36,9 @@
     "@nestjs/jwt": "^10.2.0",
     "@nestjs/platform-express": "^10.3.10",
     "@nestjs/platform-fastify": "^10.3.10",
+    "@nestjs/platform-socket.io": "^10.3.10",
     "@nestjs/terminus": "^10.2.3",
+    "@nestjs/websockets": "^10.3.10",
     "@prisma/client": "5.17.0",
     "axios": "^1.7.2",
     "bcrypt": "^5.1.1",
@@ -46,7 +48,8 @@
     "joi": "^17.13.3",
     "nodemailer": "^6.9.14",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "socket.io": "^4.7.5"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.4.2",

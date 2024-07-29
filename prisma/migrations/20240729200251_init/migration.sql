@@ -7,6 +7,9 @@ CREATE TYPE "CharacterClass" AS ENUM ('Warrior', 'Paladin', 'Hunter', 'Rogue', '
 -- CreateEnum
 CREATE TYPE "CharacterRole" AS ENUM ('Tank', 'Healer', 'Damage');
 
+-- CreateEnum
+CREATE TYPE "ListType" AS ENUM ('SuicideKing', 'TSet');
+
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
@@ -44,8 +47,8 @@ CREATE TABLE "RaidContribution" (
 -- CreateTable
 CREATE TABLE "SuicideKingList" (
     "characterId" TEXT NOT NULL,
-    "rank" INTEGER,
-    "tSetRank" INTEGER,
+    "position" INTEGER,
+    "tSetPosition" INTEGER,
 
     CONSTRAINT "SuicideKingList_pkey" PRIMARY KEY ("characterId")
 );
@@ -53,9 +56,10 @@ CREATE TABLE "SuicideKingList" (
 -- CreateTable
 CREATE TABLE "SuicideKingListHistory" (
     "characterId" TEXT NOT NULL,
-    "rank" INTEGER NOT NULL,
-    "tSetRank" INTEGER NOT NULL,
-    "timestamp" TIMESTAMP(3) NOT NULL,
+    "listType" "ListType" NOT NULL,
+    "from" INTEGER,
+    "to" INTEGER NOT NULL,
+    "timestamp" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "item" TEXT,
 
     CONSTRAINT "SuicideKingListHistory_pkey" PRIMARY KEY ("characterId")
@@ -64,11 +68,17 @@ CREATE TABLE "SuicideKingListHistory" (
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
--- AddForeignKey
-ALTER TABLE "RaidContribution" ADD CONSTRAINT "RaidContribution_characterId_fkey" FOREIGN KEY ("characterId") REFERENCES "Character"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+-- CreateIndex
+CREATE UNIQUE INDEX "SuicideKingList_position_key" ON "SuicideKingList"("position");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "SuicideKingList_tSetPosition_key" ON "SuicideKingList"("tSetPosition");
 
 -- AddForeignKey
-ALTER TABLE "SuicideKingList" ADD CONSTRAINT "SuicideKingList_characterId_fkey" FOREIGN KEY ("characterId") REFERENCES "Character"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "RaidContribution" ADD CONSTRAINT "RaidContribution_characterId_fkey" FOREIGN KEY ("characterId") REFERENCES "Character"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "SuicideKingListHistory" ADD CONSTRAINT "SuicideKingListHistory_characterId_fkey" FOREIGN KEY ("characterId") REFERENCES "Character"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "SuicideKingList" ADD CONSTRAINT "SuicideKingList_characterId_fkey" FOREIGN KEY ("characterId") REFERENCES "Character"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "SuicideKingListHistory" ADD CONSTRAINT "SuicideKingListHistory_characterId_fkey" FOREIGN KEY ("characterId") REFERENCES "Character"("id") ON DELETE CASCADE ON UPDATE CASCADE;

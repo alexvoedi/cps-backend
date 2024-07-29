@@ -54,6 +54,11 @@ enum CharacterRole {
   Damage
 }
 
+enum ListType {
+  SuicideKing
+  TSet
+}
+
 model Character {
   id                     String                   @id @default(cuid())
   name                   String
@@ -65,25 +70,26 @@ model Character {
 }
 
 model RaidContribution {
-  id          String    @id @default(cuid())
-  character   Character @relation(fields: [characterId], references: [id])
+  id          String    @id
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
   date        DateTime
   amount      Int
   characterId String
 }
 
 model SuicideKingList {
-  characterId String    @id @default(cuid())
-  character   Character @relation(fields: [characterId], references: [id])
-  rank        Int?
-  tSetRank    Int?
+  characterId  String    @id
+  character    Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  position     Int?      @unique @map("position")
+  tSetPosition Int?      @unique @map("tSetPosition")
 }
 
 model SuicideKingListHistory {
-  characterId String    @id @default(cuid())
-  character   Character @relation(fields: [characterId], references: [id])
-  rank        Int
-  tSetRank    Int
-  timestamp   DateTime
+  characterId String    @id
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  listType    ListType
+  from        Int?
+  to          Int
+  timestamp   DateTime  @default(now())
   item        String?
 }

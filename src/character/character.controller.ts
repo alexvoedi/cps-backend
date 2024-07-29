@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { CharacterService } from 'src/character/character.service';
-import { CharacterValidationDto } from 'src/character/dtos/character-validation.dto';
+import { CreateCharacterDto } from 'src/character/dtos/create-character.dto';
 
 @Controller('characters')
 export class CharacterController {
@@ -12,7 +12,7 @@ export class CharacterController {
   }
 
   @Post()
-  async createCharacter(@Body() data: CharacterValidationDto) {
+  async createCharacter(@Body() data: CreateCharacterDto) {
     return this.characterService.createCharacter(data);
   }
 
