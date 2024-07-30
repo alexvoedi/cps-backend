@@ -70,26 +70,30 @@ model Character {
 }
 
 model RaidContribution {
-  id          String    @id
-  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  id          String   @id
+  characterId String
   date        DateTime
   amount      Int
-  characterId String
+
+  character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
 }
 
 model SuicideKingList {
-  characterId  String    @id
-  character    Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
-  position     Int?      @unique @map("position")
-  tSetPosition Int?      @unique @map("tSetPosition")
+  characterId  String @id
+  position     Int?   @unique @map("position")
+  tSetPosition Int?   @unique @map("tSetPosition")
+
+  character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
 }
 
 model SuicideKingListHistory {
-  characterId String    @id
-  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  id          String   @id @default(cuid())
+  characterId String
   listType    ListType
   from        Int?
   to          Int
-  timestamp   DateTime  @default(now())
+  timestamp   DateTime @default(now())
   item        String?
+
+  character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
 }

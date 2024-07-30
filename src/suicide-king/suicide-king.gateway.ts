@@ -9,6 +9,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { SuicideKingHistoryService } from 'src/suicide-king-history/suicide-king-history.service';
 import { AddCharacterToListDto } from 'src/suicide-king/dtos/add-character-to-list.dto';
 import { AddCharacterToSuicideKingDto } from 'src/suicide-king/dtos/add-character-to-suicide-king.dto';
 import { MoveCharacterToEndDto } from 'src/suicide-king/dtos/move-character-to-end.dto';
@@ -29,16 +30,23 @@ export class SuicideKingGateway
   @WebSocketServer()
   server: Server;
 
-  constructor(private readonly suicideKingService: SuicuideKingService) {}
+  constructor(
+    private readonly suicideKingService: SuicuideKingService,
+    private readonly suicideKingHistory: SuicideKingHistoryService,
+  ) {}
 
   afterInit() {
     this.logger.log('SuicideKingGateway initialized and listening');
   }
 
   async handleConnection(client: Socket) {
-    const list = await this.suicideKingService.getList();
+    const suicideKingList = await this.suicideKingService.getList();
+    const suicideKingHistory = await this.suicideKingHistory.getHistory({
+      take: 10,
+    });
 
-    client.emit('update-suicide-king-list', list);
+    client.emit('update-suicide-king-list', suicideKingList);
+    client.emit('update-suicide-king-history', suicideKingHistory);
 
     this.logger.log(`Client connected: ${client.id}`);
   }
@@ -58,7 +66,12 @@ export class SuicideKingGateway
     body: AddCharacterToListDto,
   ) {
     const result = await this.suicideKingService.addCharacterToRaid(body);
+
     this.server.emit('update-suicide-king-list', result);
+    this.server.emit(
+      'add-suicide-king-history-entry',
+      await this.suicideKingHistory.getNewestEntry(),
+    );
   }
 
   @SubscribeMessage('move-character')
@@ -69,7 +82,12 @@ export class SuicideKingGateway
     body: MoveCharacterDto,
   ) {
     const result = await this.suicideKingService.moveCharacter(body);
+
     this.server.emit('update-suicide-king-list', result);
+    this.server.emit(
+      'add-suicide-king-history-entry',
+      await this.suicideKingHistory.getNewestEntry(),
+    );
   }
 
   @SubscribeMessage('add-to-suicide-king')
@@ -83,6 +101,10 @@ export class SuicideKingGateway
       await this.suicideKingService.addCharacterToSuicideKing(body);
 
     this.server.emit('update-suicide-king-list', result);
+    this.server.emit(
+      'add-suicide-king-history-entry',
+      await this.suicideKingHistory.getNewestEntry(),
+    );
   }
 
   @SubscribeMessage('move-to-end')
@@ -95,5 +117,9 @@ export class SuicideKingGateway
     const result = await this.suicideKingService.moveCharacterToEnd(body);
 
     this.server.emit('update-suicide-king-list', result);
+    this.server.emit(
+      'add-suicide-king-history-entry',
+      await this.suicideKingHistory.getNewestEntry(),
+    );
   }
 }

@@ -130,15 +130,8 @@ export class SuicuideKingService {
         },
       });
 
-      await prisma.suicideKingListHistory.upsert({
-        where: {
-          characterId,
-        },
-        update: {
-          from: fromPosition,
-          to: toPosition,
-        },
-        create: {
+      await prisma.suicideKingListHistory.create({
+        data: {
           characterId,
           listType,
           from: options.fromPosition,

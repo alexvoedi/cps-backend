@@ -37,9 +37,9 @@ CREATE TABLE "Character" (
 -- CreateTable
 CREATE TABLE "RaidContribution" (
     "id" TEXT NOT NULL,
+    "characterId" TEXT NOT NULL,
     "date" TIMESTAMP(3) NOT NULL,
     "amount" INTEGER NOT NULL,
-    "characterId" TEXT NOT NULL,
 
     CONSTRAINT "RaidContribution_pkey" PRIMARY KEY ("id")
 );
@@ -55,6 +55,7 @@ CREATE TABLE "SuicideKingList" (
 
 -- CreateTable
 CREATE TABLE "SuicideKingListHistory" (
+    "id" TEXT NOT NULL,
     "characterId" TEXT NOT NULL,
     "listType" "ListType" NOT NULL,
     "from" INTEGER,
@@ -62,7 +63,7 @@ CREATE TABLE "SuicideKingListHistory" (
     "timestamp" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "item" TEXT,
 
-    CONSTRAINT "SuicideKingListHistory_pkey" PRIMARY KEY ("characterId")
+    CONSTRAINT "SuicideKingListHistory_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
