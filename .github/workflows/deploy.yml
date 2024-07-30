@@ -8,14 +8,14 @@ on:
 
 env:
   DOCKER_IMAGE_NAME: cps-backend
-  DOCKER_REGISTRY_URL: myregistry.domain.com
+  DOCKER_REGISTRY_URL: ghcr.io
 
 jobs:
   build_docker_images:
     # Job name that shows in the GitHub UI
     name: Build Docker Images
     # Runner to use
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
@@ -42,7 +42,7 @@ jobs:
       - name: 'Login to GitHub Container Registry'
         uses: docker/login-action@v1
         with:
-          registry: ghcr.io
+          registry: $DOCKER_REGISTRY_URL
           username: ${{github.actor}}
           password: ${{secrets.GITHUB_TOKEN}}
 
