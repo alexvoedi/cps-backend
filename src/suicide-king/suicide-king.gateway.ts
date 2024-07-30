@@ -19,7 +19,11 @@ import { SuicuideKingService } from 'src/suicide-king/suicide-king.service';
 @WebSocketGateway({
   namespace: 'suicide-king',
   cors: {
-    origin: '*',
+    origin: [
+      'http://localhost:5173',
+      'http://127.0.0.1:5173',
+      'https://alexvoedi.github.io',
+    ],
   },
 })
 export class SuicideKingGateway
