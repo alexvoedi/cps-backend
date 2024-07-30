@@ -35,4 +35,4 @@ jobs:
         run: docker push $DOCKER_REGISTRY_URL/alexvoedi/$DOCKER_IMAGE_NAME:latest
 
       - name: Remove the Docker image with latest tag
-        run: docker rmi $DOCKER_REGISTRY_URL/$DOCKER_IMAGE_NAME:latest
+        run: docker rmi $DOCKER_REGISTRY_URL/alexvoedi/$DOCKER_IMAGE_NAME:latest
