@@ -1,4 +1,4 @@
-import { Logger, UseInterceptors } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import {
   MessageBody,
   OnGatewayConnection,
@@ -17,8 +17,7 @@ import { MoveCharacterDto } from 'src/suicide-king/dtos/move-character.dto';
 import { SuicuideKingService } from 'src/suicide-king/suicide-king.service';
 
 @WebSocketGateway({
-  namespace: 'suicide-king',
-  cors: true,
+  path: 'suicide-king',
 })
 export class SuicideKingGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
