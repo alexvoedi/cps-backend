@@ -18,11 +18,17 @@ async function bootstrap() {
   });
 
   app.enableCors({
-    origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+    origin: [
+      'http://localhost:5173',
+      'http://127.0.0.1:5173',
+      'https://alexvoedi.github.io',
+    ],
     credentials: true,
   });
 
   app.useGlobalPipes(new ValidationPipe());
+
+  app.setGlobalPrefix('cps-backend');
 
   await app.listen(3000, '0.0.0.0');
 }
