@@ -17,6 +17,7 @@ import { MoveCharacterDto } from 'src/suicide-king/dtos/move-character.dto';
 import { SuicuideKingService } from 'src/suicide-king/suicide-king.service';
 
 @WebSocketGateway({
+  namespace: 'suicide-king',
   cors: {
     origin: [
       'http://localhost:5173',
