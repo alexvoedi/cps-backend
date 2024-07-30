@@ -4,10 +4,13 @@ import {
   FastifyAdapter,
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import fastifyCookie from '@fastify/cookie';
 
 async function bootstrap() {
+  // init logger
+  const logger = new Logger('NestApplication');
+
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter(),
@@ -28,6 +31,12 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe());
 
-  await app.listen(3000, '0.0.0.0');
+  await app.listen(3000, '0.0.0.0', (err, address) => {
+    if (err) {
+      console.error(err);
+      process.exit(1);
+    }
+    logger.log(`Server listening on ${address}`);
+  });
 }
 bootstrap();
