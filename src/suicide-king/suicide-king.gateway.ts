@@ -18,13 +18,7 @@ import { SuicuideKingService } from 'src/suicide-king/suicide-king.service';
 
 @WebSocketGateway({
   namespace: 'suicide-king',
-  cors: {
-    origin: [
-      'http://localhost:5173',
-      'http://127.0.0.1:5173',
-      'https://alexvoedi.github.io',
-    ],
-  },
+  cors: '*',
 })
 export class SuicideKingGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
