@@ -18,7 +18,7 @@ import { SuicuideKingService } from 'src/suicide-king/suicide-king.service';
 
 @WebSocketGateway({
   namespace: 'suicide-king',
-  cors: '*',
+  cors: true,
 })
 export class SuicideKingGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
