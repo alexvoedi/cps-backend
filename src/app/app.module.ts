@@ -18,6 +18,7 @@ import { UserModule } from 'src/user/user.module';
         POSTGRES_DB: Joi.string().required(),
         GOOGLE_AUTH_CLIENT_ID: Joi.string().required(),
         GOOGLE_AUTH_CLIENT_SECRET: Joi.string().required(),
+        COOKIE_SECRET: Joi.string().required(),
         JWT_SECRET: Joi.string().required(),
         JWT_REFRESH_TOKEN_SECRET: Joi.string().required(),
         JWT_EXPIRATION_TIME: Joi.number().required(),

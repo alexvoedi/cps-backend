@@ -8,7 +8,6 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import fastifyCookie from '@fastify/cookie';
 
 async function bootstrap() {
-  // init logger
   const logger = new Logger('NestApplication');
 
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -17,7 +16,7 @@ async function bootstrap() {
   );
 
   await app.register(fastifyCookie, {
-    secret: 'my-secret',
+    secret: process.env.COOKIE_SECRET,
   });
 
   app.enableCors({
@@ -36,6 +35,7 @@ async function bootstrap() {
       console.error(err);
       process.exit(1);
     }
+
     logger.log(`Server listening on ${address}`);
   });
 }
