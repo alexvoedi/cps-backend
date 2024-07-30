@@ -28,8 +28,6 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe());
 
-  app.setGlobalPrefix('cps-backend');
-
   await app.listen(3000, '0.0.0.0');
 }
 bootstrap();

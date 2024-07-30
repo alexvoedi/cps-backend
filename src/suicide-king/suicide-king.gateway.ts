@@ -17,7 +17,14 @@ import { MoveCharacterDto } from 'src/suicide-king/dtos/move-character.dto';
 import { SuicuideKingService } from 'src/suicide-king/suicide-king.service';
 
 @WebSocketGateway({
-  path: 'suicide-king',
+  cors: {
+    origin: [
+      'http://localhost:5173',
+      'http://127.0.0.1:5173',
+      'https://alexvoedi.github.io',
+    ],
+    credentials: true,
+  },
 })
 export class SuicideKingGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
