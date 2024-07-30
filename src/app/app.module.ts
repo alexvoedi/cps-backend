@@ -26,6 +26,7 @@ import { UserModule } from 'src/user/user.module';
         MAIL_PASS: Joi.string().required(),
         FRONTEND_URL: Joi.string().required(),
       }),
+      cache: true,
     }),
     HealthModule,
     AuthModule,

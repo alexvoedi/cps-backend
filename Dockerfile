@@ -29,10 +29,16 @@ RUN pnpm run build
 
 # ---
 
+FROM build AS prisma
+RUN pnpm run prisma:generate
+
+# ---
+
 FROM base AS prod
 
 COPY --from=prod-deps /app/node_modules /app/node_modules
 COPY --from=build /app/dist /app/dist
+COPY --from=prisma /app/node_modules/@prisma/client /app/node_modules/@prisma/client
 
 EXPOSE 3000
 
