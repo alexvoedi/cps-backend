@@ -47,6 +47,7 @@ CREATE TABLE "RaidContribution" (
 -- CreateTable
 CREATE TABLE "SuicideKingList" (
     "characterId" TEXT NOT NULL,
+    "active" BOOLEAN NOT NULL DEFAULT true,
     "position" INTEGER,
     "tSetPosition" INTEGER,
 

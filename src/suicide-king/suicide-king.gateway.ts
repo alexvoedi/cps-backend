@@ -14,6 +14,7 @@ import { AddCharacterToListDto } from 'src/suicide-king/dtos/add-character-to-li
 import { AddCharacterToSuicideKingDto } from 'src/suicide-king/dtos/add-character-to-suicide-king.dto';
 import { MoveCharacterToEndDto } from 'src/suicide-king/dtos/move-character-to-end.dto';
 import { MoveCharacterDto } from 'src/suicide-king/dtos/move-character.dto';
+import { SetCharacterInactiveDto } from 'src/suicide-king/dtos/set-character-inactive.dto';
 import { SuicuideKingService } from 'src/suicide-king/suicide-king.service';
 
 @WebSocketGateway({
@@ -70,6 +71,8 @@ export class SuicideKingGateway
     })
     body: AddCharacterToListDto,
   ) {
+    this.logger.verbose(`add-character-to-list: ${JSON.stringify(body)}`);
+
     const result = await this.suicideKingService.addCharacterToRaid(body);
 
     this.server.emit('update-suicide-king-list', result);
@@ -86,6 +89,8 @@ export class SuicideKingGateway
     })
     body: MoveCharacterDto,
   ) {
+    this.logger.verbose(`move-character: ${JSON.stringify(body)}`);
+
     const result = await this.suicideKingService.moveCharacter(body);
 
     this.server.emit('update-suicide-king-list', result);
@@ -102,6 +107,8 @@ export class SuicideKingGateway
     })
     body: AddCharacterToSuicideKingDto,
   ) {
+    this.logger.verbose(`add-to-suicide-king: ${JSON.stringify(body)}`);
+
     const result =
       await this.suicideKingService.addCharacterToSuicideKing(body);
 
@@ -119,6 +126,8 @@ export class SuicideKingGateway
     })
     body: MoveCharacterToEndDto,
   ) {
+    this.logger.verbose(`move-to-end: ${JSON.stringify(body)}`);
+
     const result = await this.suicideKingService.moveCharacterToEnd(body);
 
     this.server.emit('update-suicide-king-list', result);
@@ -126,5 +135,36 @@ export class SuicideKingGateway
       'add-suicide-king-history-entry',
       await this.suicideKingHistory.getNewestEntry(),
     );
+  }
+
+  @SubscribeMessage('set-character-inactive')
+  async setCharacterInactive(
+    @MessageBody({
+      transform: (value) => JSON.parse(value),
+    })
+    body: SetCharacterInactiveDto,
+  ) {
+    this.logger.verbose(`set-character-inactive: ${JSON.stringify(body)}`);
+
+    const result = await this.suicideKingService.setCharacterActive(
+      body,
+      false,
+    );
+
+    this.server.emit('update-suicide-king-list', result);
+  }
+
+  @SubscribeMessage('set-character-active')
+  async setCharacterActive(
+    @MessageBody({
+      transform: (value) => JSON.parse(value),
+    })
+    body: SetCharacterInactiveDto,
+  ) {
+    this.logger.verbose(`set-character-active: ${JSON.stringify(body)}`);
+
+    const result = await this.suicideKingService.setCharacterActive(body, true);
+
+    this.server.emit('update-suicide-king-list', result);
   }
 }

@@ -8,6 +8,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { AddCharacterToSuicideKingDto } from 'src/suicide-king/dtos/add-character-to-suicide-king.dto';
 import { MoveCharacterToEndDto } from 'src/suicide-king/dtos/move-character-to-end.dto';
 import { MoveCharacterDto } from 'src/suicide-king/dtos/move-character.dto';
+import { SetCharacterInactiveDto } from 'src/suicide-king/dtos/set-character-inactive.dto';
 import { ListType } from 'src/suicide-king/enums/list-type.enum';
 
 @Injectable()
@@ -104,17 +105,26 @@ export class SuicuideKingService {
           : a.position - b.position,
       );
 
+      let inactiveCounter = 0;
+
       for (const item of sortedList) {
+        if (!item.active) {
+          inactiveCounter++;
+          continue;
+        }
+
         await prisma.suicideKingList.update({
           where: {
             characterId: item.characterId,
           },
           data: {
             [listKey]: {
-              [adjust]: 1,
+              [adjust]: 1 + inactiveCounter,
             },
           },
         });
+
+        inactiveCounter = Math.max(0, inactiveCounter - 1);
       }
 
       await prisma.suicideKingList.upsert({
@@ -152,14 +162,29 @@ export class SuicuideKingService {
     });
 
     if (character) {
-      throw new BadRequestException('Character already in list');
-    }
+      await this.prisma.suicideKingList.update({
+        where: {
+          characterId: dto.characterId,
+        },
+        data: {
+          active: true,
+        },
+      });
 
-    await this.updateList({
-      listType,
-      characterId: dto.characterId,
-      toPosition: dto.position,
-    });
+      await this.moveCharacter({
+        listType,
+        characterId: dto.characterId,
+        fromPosition: character.position,
+        toPosition: dto.toPosition,
+      });
+    } else {
+      await this.updateList({
+        listType,
+        characterId: dto.characterId,
+        fromPosition: dto.fromPosition,
+        toPosition: dto.toPosition,
+      });
+    }
 
     return this.prisma.suicideKingList.findMany({
       orderBy: {
@@ -169,19 +194,9 @@ export class SuicuideKingService {
   }
 
   async moveCharacter({ listType, ...dto }: MoveCharacterDto) {
-    const character = await this.getCharacterByIdOrThrow(dto.characterId);
+    await this.getCharacterByIdOrThrow(dto.characterId);
 
     if (dto.fromPosition && dto.toPosition) {
-      if (character.position === dto.toPosition) {
-        throw new BadRequestException(
-          'Old position must not match new position',
-        );
-      }
-
-      if (character.position !== dto.fromPosition) {
-        throw new BadRequestException('Old position must match new position');
-      }
-
       await this.updateList({
         listType,
         characterId: dto.characterId,
@@ -200,17 +215,13 @@ export class SuicuideKingService {
   async moveCharacterToEnd({ listType, ...dto }: MoveCharacterToEndDto) {
     const character = await this.getCharacterByIdOrThrow(dto.characterId);
 
-    const list = await this.prisma.suicideKingList.findMany({
-      orderBy: {
-        position: 'asc',
-      },
-    });
+    const listLength = await this.prisma.suicideKingList.count();
 
     await this.updateList({
       listType,
       characterId: dto.characterId,
       fromPosition: character.position,
-      toPosition: list.length,
+      toPosition: listLength,
     });
 
     return this.prisma.suicideKingList.findMany({
@@ -222,5 +233,24 @@ export class SuicuideKingService {
 
   getListKey(listType: ListType) {
     return listType === ListType.SuicideKing ? 'position' : 'tSetPosition';
+  }
+
+  async setCharacterActive(dto: SetCharacterInactiveDto, active: boolean) {
+    await this.getCharacterByIdOrThrow(dto.characterId);
+
+    await this.prisma.suicideKingList.update({
+      where: {
+        characterId: dto.characterId,
+      },
+      data: {
+        active,
+      },
+    });
+
+    return this.prisma.suicideKingList.findMany({
+      orderBy: {
+        position: 'asc',
+      },
+    });
   }
 }
