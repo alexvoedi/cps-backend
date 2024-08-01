@@ -1,4 +1,5 @@
-import { Logger } from '@nestjs/common';
+import { Logger, UseGuards } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import {
   MessageBody,
   OnGatewayConnection,
@@ -8,7 +9,10 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import { UserRole } from '@prisma/client';
 import { Server, Socket } from 'socket.io';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { SuicideKingHistoryService } from 'src/suicide-king-history/suicide-king-history.service';
 import { AddCharacterToListDto } from 'src/suicide-king/dtos/add-character-to-list.dto';
 import { AddCharacterToSuicideKingDto } from 'src/suicide-king/dtos/add-character-to-suicide-king.dto';
@@ -82,6 +86,7 @@ export class SuicideKingGateway
     );
   }
 
+  @Roles([UserRole.RaidLead])
   @SubscribeMessage('move-character')
   async moveCharacter(
     @MessageBody({

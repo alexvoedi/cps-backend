@@ -1,3 +1,6 @@
+import { UserRole } from '@prisma/client';
+
 export interface TokenPayload {
-  userId: string
+  id: string;
+  role: UserRole;
 }

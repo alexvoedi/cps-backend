@@ -1,6 +1,7 @@
 import { MailerModule } from '@nestjs-modules/mailer';
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
 import * as Joi from 'joi';
 import { AuthModule } from 'src/auth/auth.module';
 import { GoogleAuthModule } from 'src/auth/google/google-auth.module';
@@ -12,6 +13,7 @@ import { UserModule } from 'src/user/user.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
+      isGlobal: true,
       validationSchema: Joi.object({
         POSTGRES_USER: Joi.string().required(),
         POSTGRES_PASSWORD: Joi.string().required(),
@@ -28,6 +30,19 @@ import { UserModule } from 'src/user/user.module';
         FRONTEND_URL: Joi.string().required(),
       }),
       cache: true,
+    }),
+    JwtModule.registerAsync({
+      global: true,
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => {
+        return {
+          secret: configService.get<string>('JWT_SECRET'),
+          signOptions: {
+            expiresIn: `${configService.get<number>('JWT_EXPIRATION_TIME')}s`,
+          },
+        };
+      },
     }),
     HealthModule,
     AuthModule,

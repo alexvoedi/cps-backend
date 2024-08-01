@@ -14,10 +14,10 @@ export class AuthService {
   ) {}
 
   async getCookiesForUser(user: User) {
-    const accessTokenCookie = this.getCookieWithJwtToken(user.id);
+    const accessTokenCookie = this.getCookieWithJwtToken(user);
 
     const { cookie: refreshTokenCookie, token: refreshToken } =
-      this.getCookieWithJwtRefreshToken(user.id);
+      this.getCookieWithJwtRefreshToken(user);
 
     await this.userService.setCurrentRefreshToken(refreshToken, user.id);
 
@@ -27,8 +27,8 @@ export class AuthService {
     };
   }
 
-  public getCookieWithJwtToken(userId: string) {
-    const payload: TokenPayload = { userId };
+  public getCookieWithJwtToken(user: User) {
+    const payload: TokenPayload = { id: user.id, role: user.role };
 
     const token = this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_SECRET'),
@@ -47,8 +47,8 @@ export class AuthService {
     return cookie;
   }
 
-  public getCookieWithJwtRefreshToken(userId: string) {
-    const payload: TokenPayload = { userId };
+  public getCookieWithJwtRefreshToken(user: User) {
+    const payload: TokenPayload = { id: user.id, role: user.role };
 
     const token = this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET'),
@@ -86,7 +86,7 @@ export class AuthService {
   }
 
   async getUserIdFromToken(token: string) {
-    const { userId } = this.jwtService.verify(token, {
+    const { id: userId } = this.jwtService.verify(token, {
       secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET'),
     });
 

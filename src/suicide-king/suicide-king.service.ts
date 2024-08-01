@@ -86,12 +86,10 @@ export class SuicuideKingService {
       },
     });
 
-    console.log(this.getUpdateRange(fromPosition, toPosition));
-
     const suicideKingActive = suicideKing.filter((item) => item.active);
     const suicideKingInactive = suicideKing.filter((item) => !item.active);
 
-    const hasInactiveWithPosition = (position: number) =>
+    const isPositionLocked = (position: number) =>
       suicideKingInactive.some((item) => item[listKey] === position);
 
     const direction = fromPosition && fromPosition < toPosition ? -1 : 1;
@@ -111,12 +109,16 @@ export class SuicuideKingService {
           },
         });
 
+        changes.push({
+          name: characterId,
+          from: fromPosition,
+          to: toPosition,
+        });
+
         for (const entry of suicideKingActive) {
           let newPosition = entry[listKey] + direction;
 
-          console.log(hasInactiveWithPosition(newPosition));
-
-          while (hasInactiveWithPosition(newPosition)) {
+          while (isPositionLocked(newPosition)) {
             newPosition += direction;
           }
 
@@ -129,19 +131,12 @@ export class SuicuideKingService {
             },
           });
 
-          console.log(
-            entry.position,
-            newPosition,
-            direction,
-            hasInactiveWithPosition(newPosition),
-          );
+          changes.push({
+            name: entry.characterId,
+            from: entry[listKey],
+            to: newPosition,
+          });
         }
-
-        changes.push({
-          name: characterId,
-          from: fromPosition,
-          to: toPosition,
-        });
 
         await prisma.suicideKingListHistory.create({
           data: {
