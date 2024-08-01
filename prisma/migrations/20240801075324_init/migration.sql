@@ -70,12 +70,6 @@ CREATE TABLE "SuicideKingListHistory" (
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
--- CreateIndex
-CREATE UNIQUE INDEX "SuicideKingList_position_key" ON "SuicideKingList"("position");
-
--- CreateIndex
-CREATE UNIQUE INDEX "SuicideKingList_tSetPosition_key" ON "SuicideKingList"("tSetPosition");
-
 -- AddForeignKey
 ALTER TABLE "RaidContribution" ADD CONSTRAINT "RaidContribution_characterId_fkey" FOREIGN KEY ("characterId") REFERENCES "Character"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 

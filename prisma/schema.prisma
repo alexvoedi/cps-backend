@@ -81,8 +81,8 @@ model RaidContribution {
 model SuicideKingList {
   characterId  String  @id
   active       Boolean @default(true)
-  position     Int?    @unique @map("position")
-  tSetPosition Int?    @unique @map("tSetPosition")
+  position     Int?    @map("position")
+  tSetPosition Int?    @map("tSetPosition")
 
   character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
 }

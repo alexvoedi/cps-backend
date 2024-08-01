@@ -1,9 +1,11 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
+import { ITXClientDenyList } from '@prisma/client/runtime/library';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AddCharacterToSuicideKingDto } from 'src/suicide-king/dtos/add-character-to-suicide-king.dto';
 import { MoveCharacterToEndDto } from 'src/suicide-king/dtos/move-character-to-end.dto';
@@ -13,6 +15,8 @@ import { ListType } from 'src/suicide-king/enums/list-type.enum';
 
 @Injectable()
 export class SuicuideKingService {
+  private readonly logger = new Logger(SuicuideKingService.name);
+
   constructor(private readonly prisma: PrismaService) {}
 
   async getList() {
@@ -43,10 +47,6 @@ export class SuicuideKingService {
     return character;
   }
 
-  async checkPositionValidity() {
-    // todo
-  }
-
   async updateList({
     characterId,
     listType,
@@ -58,25 +58,21 @@ export class SuicuideKingService {
     fromPosition?: number;
     toPosition: number;
   }) {
-    const fromPosition = options.fromPosition ?? 1_000_000; // A number larger than anything in the list that works with postgres
+    const changes: Array<{
+      name: string;
+      from: number;
+      to: number;
+    }> = [];
+
+    const fromPosition = options.fromPosition > 0 ? options.fromPosition : null;
 
     const listKey = this.getListKey(listType);
-
-    const [from, to] = [
-      Math.min(fromPosition, toPosition),
-      Math.max(fromPosition, toPosition),
-    ];
-
-    const adjust = fromPosition > toPosition ? 'increment' : 'decrement';
 
     const suicideKing = await this.prisma.suicideKingList.findMany({
       where: {
         AND: [
           {
-            [listKey]: {
-              gte: from,
-              lte: to,
-            },
+            [listKey]: this.getUpdateRange(fromPosition, toPosition),
           },
           {
             NOT: {
@@ -85,70 +81,110 @@ export class SuicuideKingService {
           },
         ],
       },
+      orderBy: {
+        [listKey]: 'asc',
+      },
     });
 
-    await this.prisma.$transaction(async (prisma) => {
-      if (options.fromPosition) {
-        await this.prisma.suicideKingList.update({
+    console.log(this.getUpdateRange(fromPosition, toPosition));
+
+    const suicideKingActive = suicideKing.filter((item) => item.active);
+    const suicideKingInactive = suicideKing.filter((item) => !item.active);
+
+    const hasInactiveWithPosition = (position: number) =>
+      suicideKingInactive.some((item) => item[listKey] === position);
+
+    const direction = fromPosition && fromPosition < toPosition ? -1 : 1;
+
+    await this.prisma.$transaction(
+      async (prisma) => {
+        await prisma.suicideKingList.upsert({
           where: {
             characterId,
           },
-          data: {
-            position: null,
+          update: {
+            [listKey]: toPosition,
+          },
+          create: {
+            characterId,
+            [listKey]: toPosition,
           },
         });
-      }
 
-      const sortedList = suicideKing.sort((a, b) =>
-        adjust === 'increment'
-          ? b.position - a.position
-          : a.position - b.position,
-      );
+        for (const entry of suicideKingActive) {
+          let newPosition = entry[listKey] + direction;
 
-      let inactiveCounter = 0;
+          console.log(hasInactiveWithPosition(newPosition));
 
-      for (const item of sortedList) {
-        if (!item.active) {
-          inactiveCounter++;
-          continue;
+          while (hasInactiveWithPosition(newPosition)) {
+            newPosition += direction;
+          }
+
+          await prisma.suicideKingList.update({
+            where: {
+              characterId: entry.characterId,
+            },
+            data: {
+              [listKey]: newPosition,
+            },
+          });
+
+          console.log(
+            entry.position,
+            newPosition,
+            direction,
+            hasInactiveWithPosition(newPosition),
+          );
         }
 
-        await prisma.suicideKingList.update({
-          where: {
-            characterId: item.characterId,
-          },
+        changes.push({
+          name: characterId,
+          from: fromPosition,
+          to: toPosition,
+        });
+
+        await prisma.suicideKingListHistory.create({
           data: {
-            [listKey]: {
-              [adjust]: 1 + inactiveCounter,
-            },
+            characterId,
+            listType,
+            from: options.fromPosition,
+            to: toPosition,
           },
         });
 
-        inactiveCounter = Math.max(0, inactiveCounter - 1);
-      }
+        await this.checkListConsistency(prisma, listType);
+      },
+      {
+        isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      },
+    );
 
-      await prisma.suicideKingList.upsert({
-        where: {
-          characterId,
-        },
-        update: {
-          [listKey]: toPosition,
-        },
-        create: {
-          characterId,
-          [listKey]: toPosition,
-        },
-      });
-
-      await prisma.suicideKingListHistory.create({
-        data: {
-          characterId,
-          listType,
-          from: options.fromPosition,
-          to: toPosition,
-        },
-      });
+    changes.forEach((change) => {
+      this.logger.verbose(
+        `Moved ${change.name} from ${change.from} to ${change.to}`,
+      );
     });
+  }
+
+  private getUpdateRange(fromPosition: number | null, toPosition: number) {
+    const gte = Math.min(
+      fromPosition > 0 ? fromPosition : toPosition,
+      toPosition,
+    );
+
+    const lte = fromPosition
+      ? Math.max(fromPosition > 0 ? fromPosition : toPosition, toPosition)
+      : null;
+
+    const range = {
+      gte,
+    };
+
+    if (lte) {
+      range['lte'] = lte;
+    }
+
+    return range;
   }
 
   async addCharacterToSuicideKing({
@@ -252,5 +288,42 @@ export class SuicuideKingService {
         position: 'asc',
       },
     });
+  }
+
+  async checkListConsistency(
+    prisma: Omit<PrismaClient, ITXClientDenyList>,
+    listType: ListType,
+  ) {
+    const listKey = this.getListKey(listType);
+
+    const list = await prisma.suicideKingList.findMany({
+      orderBy: {
+        [listKey]: 'asc',
+      },
+    });
+
+    if (list.length === 0) {
+      return;
+    }
+
+    const positions = new Set();
+
+    for (let i = 1; i <= list.length; i++) {
+      const entry = list[i - 1];
+
+      if (positions.has(entry[listKey])) {
+        throw new BadRequestException(
+          `Character ${entry.characterId} has a duplicate position`,
+        );
+      }
+
+      if (entry[listKey] !== i) {
+        throw new BadRequestException(
+          `Character ${entry.characterId} has an incorrect position`,
+        );
+      }
+
+      positions.add(entry[listKey]);
+    }
   }
 }
