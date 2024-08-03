@@ -3,17 +3,17 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
-export class SuicideKingHistoryService {
+export class PriorityListHistoryService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getHistory(params: {
     skip?: number;
     take?: number;
-    cursor?: Prisma.SuicideKingListHistoryWhereUniqueInput;
-    where?: Prisma.SuicideKingListHistoryWhereInput;
+    cursor?: Prisma.PriorityListHistoryWhereUniqueInput;
+    where?: Prisma.PriorityListHistoryWhereInput;
   }) {
     const { skip, take, cursor, where } = params;
-    return this.prisma.suicideKingListHistory.findMany({
+    return this.prisma.priorityListHistory.findMany({
       skip,
       take,
       cursor,
@@ -25,7 +25,7 @@ export class SuicideKingHistoryService {
   }
 
   async getNewestEntry() {
-    return this.prisma.suicideKingListHistory.findMany({
+    return this.prisma.priorityListHistory.findMany({
       orderBy: {
         timestamp: 'desc',
       },

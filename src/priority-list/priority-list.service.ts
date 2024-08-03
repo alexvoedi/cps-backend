@@ -4,37 +4,36 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma, PrismaClient } from '@prisma/client';
+import { ListType, Prisma, PrismaClient } from '@prisma/client';
 import { ITXClientDenyList } from '@prisma/client/runtime/library';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { AddCharacterToSuicideKingDto } from 'src/suicide-king/dtos/add-character-to-suicide-king.dto';
-import { MoveCharacterToEndDto } from 'src/suicide-king/dtos/move-character-to-end.dto';
-import { MoveCharacterDto } from 'src/suicide-king/dtos/move-character.dto';
-import { SetCharacterInactiveDto } from 'src/suicide-king/dtos/set-character-inactive.dto';
-import { ListType } from 'src/suicide-king/enums/list-type.enum';
+import { AddCharacterToPriorityListDto } from './dtos/add-character-to-priority-list.dto';
+import { MoveCharacterToEndDto } from './dtos/move-character-to-end.dto';
+import { MoveCharacterDto } from './dtos/move-character.dto';
+import { SetCharacterInactiveDto } from './dtos/set-character-active.dto';
 
 @Injectable()
-export class SuicuideKingService {
-  private readonly logger = new Logger(SuicuideKingService.name);
+export class PriorityListService {
+  private readonly logger = new Logger(PriorityListService.name);
 
   constructor(private readonly prisma: PrismaService) {}
 
   async getList() {
-    return this.prisma.suicideKingList.findMany({
+    return this.prisma.priorityList.findMany({
       orderBy: {
         position: 'asc',
       },
     });
   }
 
-  async addCharacterToRaid(data: Prisma.SuicideKingListUncheckedCreateInput) {
-    return await this.prisma.suicideKingList.create({
+  async addCharacterToRaid(data: Prisma.PriorityListUncheckedCreateInput) {
+    return await this.prisma.priorityList.create({
       data,
     });
   }
 
   async getCharacterByIdOrThrow(characterId: string) {
-    const character = await this.prisma.suicideKingList.findUnique({
+    const character = await this.prisma.priorityList.findUnique({
       where: {
         characterId,
       },
@@ -68,7 +67,7 @@ export class SuicuideKingService {
 
     const listKey = this.getListKey(listType);
 
-    const suicideKing = await this.prisma.suicideKingList.findMany({
+    const priorityList = await this.prisma.priorityList.findMany({
       where: {
         AND: [
           {
@@ -86,17 +85,17 @@ export class SuicuideKingService {
       },
     });
 
-    const suicideKingActive = suicideKing.filter((item) => item.active);
-    const suicideKingInactive = suicideKing.filter((item) => !item.active);
+    const priorityListActive = priorityList.filter((item) => item.active);
+    const priorityListInactive = priorityList.filter((item) => !item.active);
 
     const isPositionLocked = (position: number) =>
-      suicideKingInactive.some((item) => item[listKey] === position);
+      priorityListInactive.some((item) => item[listKey] === position);
 
     const direction = fromPosition && fromPosition < toPosition ? -1 : 1;
 
     await this.prisma.$transaction(
       async (prisma) => {
-        await prisma.suicideKingList.upsert({
+        await prisma.priorityList.upsert({
           where: {
             characterId,
           },
@@ -115,14 +114,14 @@ export class SuicuideKingService {
           to: toPosition,
         });
 
-        for (const entry of suicideKingActive) {
+        for (const entry of priorityListActive) {
           let newPosition = entry[listKey] + direction;
 
           while (isPositionLocked(newPosition)) {
             newPosition += direction;
           }
 
-          await prisma.suicideKingList.update({
+          await prisma.priorityList.update({
             where: {
               characterId: entry.characterId,
             },
@@ -138,7 +137,7 @@ export class SuicuideKingService {
           });
         }
 
-        await prisma.suicideKingListHistory.create({
+        await prisma.priorityListHistory.create({
           data: {
             characterId,
             listType,
@@ -182,18 +181,18 @@ export class SuicuideKingService {
     return range;
   }
 
-  async addCharacterToSuicideKing({
+  async addCharacterToPriorityList({
     listType,
     ...dto
-  }: AddCharacterToSuicideKingDto) {
-    const character = await this.prisma.suicideKingList.findUnique({
+  }: AddCharacterToPriorityListDto) {
+    const character = await this.prisma.priorityList.findUnique({
       where: {
         characterId: dto.characterId,
       },
     });
 
     if (character) {
-      await this.prisma.suicideKingList.update({
+      await this.prisma.priorityList.update({
         where: {
           characterId: dto.characterId,
         },
@@ -217,7 +216,7 @@ export class SuicuideKingService {
       });
     }
 
-    return this.prisma.suicideKingList.findMany({
+    return this.prisma.priorityList.findMany({
       orderBy: {
         position: 'asc',
       },
@@ -236,7 +235,7 @@ export class SuicuideKingService {
       });
     }
 
-    return this.prisma.suicideKingList.findMany({
+    return this.prisma.priorityList.findMany({
       orderBy: {
         position: 'asc',
       },
@@ -246,7 +245,7 @@ export class SuicuideKingService {
   async moveCharacterToEnd({ listType, ...dto }: MoveCharacterToEndDto) {
     const character = await this.getCharacterByIdOrThrow(dto.characterId);
 
-    const listLength = await this.prisma.suicideKingList.count();
+    const listLength = await this.prisma.priorityList.count();
 
     await this.updateList({
       listType,
@@ -255,7 +254,7 @@ export class SuicuideKingService {
       toPosition: listLength,
     });
 
-    return this.prisma.suicideKingList.findMany({
+    return this.prisma.priorityList.findMany({
       orderBy: {
         position: 'asc',
       },
@@ -263,13 +262,13 @@ export class SuicuideKingService {
   }
 
   getListKey(listType: ListType) {
-    return listType === ListType.SuicideKing ? 'position' : 'tSetPosition';
+    return listType === ListType.Item ? 'position' : 'tSetPosition';
   }
 
   async setCharacterActive(dto: SetCharacterInactiveDto, active: boolean) {
     await this.getCharacterByIdOrThrow(dto.characterId);
 
-    await this.prisma.suicideKingList.update({
+    await this.prisma.priorityList.update({
       where: {
         characterId: dto.characterId,
       },
@@ -278,7 +277,7 @@ export class SuicuideKingService {
       },
     });
 
-    return this.prisma.suicideKingList.findMany({
+    return this.prisma.priorityList.findMany({
       orderBy: {
         position: 'asc',
       },
@@ -291,7 +290,7 @@ export class SuicuideKingService {
   ) {
     const listKey = this.getListKey(listType);
 
-    const list = await prisma.suicideKingList.findMany({
+    const list = await prisma.priorityList.findMany({
       orderBy: {
         [listKey]: 'asc',
       },

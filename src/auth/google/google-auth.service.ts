@@ -4,7 +4,6 @@ import { User } from '@prisma/client';
 import { google, Auth } from 'googleapis';
 import { AuthService } from 'src/auth/auth.service';
 import { UserService } from 'src/user/user.service';
-import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class GoogleAuthService {
@@ -38,7 +37,7 @@ export class GoogleAuthService {
   }
 
   async verify(refreshToken: string) {
-    const user = this.authService.getUserFromToken(refreshToken);
+    const user = await this.authService.getUserFromToken(refreshToken);
 
     if (!user) {
       throw new UnauthorizedException('User not registered');

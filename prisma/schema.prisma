@@ -55,18 +55,18 @@ enum CharacterRole {
 }
 
 enum ListType {
-  SuicideKing
+  Item
   TSet
 }
 
 model Character {
-  id                     String                   @id @default(cuid())
-  name                   String
-  class                  CharacterClass
-  roles                  CharacterRole[]
-  RaidContribution       RaidContribution[]
-  SuicideKingList        SuicideKingList[]
-  SuicideKingListHistory SuicideKingListHistory[]
+  id                  String                @id @default(cuid())
+  name                String
+  class               CharacterClass
+  roles               CharacterRole[]
+  RaidContribution    RaidContribution[]
+  PriorityList        PriorityList[]
+  PriorityListHistory PriorityListHistory[]
 }
 
 model RaidContribution {
@@ -78,16 +78,18 @@ model RaidContribution {
   character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
 }
 
-model SuicideKingList {
+model PriorityList {
   characterId  String  @id
   active       Boolean @default(true)
   position     Int?    @map("position")
   tSetPosition Int?    @map("tSetPosition")
 
   character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+
+  @@map("PriorityList")
 }
 
-model SuicideKingListHistory {
+model PriorityListHistory {
   id          String   @id @default(cuid())
   characterId String
   listType    ListType

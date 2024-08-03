@@ -1,4 +1,4 @@
-import { ListType } from 'src/suicide-king/enums/list-type.enum';
+import { ListType } from '@prisma/client';
 
 export class MoveCharacterDto {
   characterId: string;

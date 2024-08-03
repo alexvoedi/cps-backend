@@ -8,7 +8,7 @@ CREATE TYPE "CharacterClass" AS ENUM ('Warrior', 'Paladin', 'Hunter', 'Rogue', '
 CREATE TYPE "CharacterRole" AS ENUM ('Tank', 'Healer', 'Damage');
 
 -- CreateEnum
-CREATE TYPE "ListType" AS ENUM ('SuicideKing', 'TSet');
+CREATE TYPE "ListType" AS ENUM ('Priority', 'TSet');
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -45,17 +45,17 @@ CREATE TABLE "RaidContribution" (
 );
 
 -- CreateTable
-CREATE TABLE "SuicideKingList" (
+CREATE TABLE "PriorityList" (
     "characterId" TEXT NOT NULL,
     "active" BOOLEAN NOT NULL DEFAULT true,
     "position" INTEGER,
     "tSetPosition" INTEGER,
 
-    CONSTRAINT "SuicideKingList_pkey" PRIMARY KEY ("characterId")
+    CONSTRAINT "PriorityList_pkey" PRIMARY KEY ("characterId")
 );
 
 -- CreateTable
-CREATE TABLE "SuicideKingListHistory" (
+CREATE TABLE "PriorityListHistory" (
     "id" TEXT NOT NULL,
     "characterId" TEXT NOT NULL,
     "listType" "ListType" NOT NULL,
@@ -64,7 +64,7 @@ CREATE TABLE "SuicideKingListHistory" (
     "timestamp" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "item" TEXT,
 
-    CONSTRAINT "SuicideKingListHistory_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "PriorityListHistory_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -74,7 +74,7 @@ CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 ALTER TABLE "RaidContribution" ADD CONSTRAINT "RaidContribution_characterId_fkey" FOREIGN KEY ("characterId") REFERENCES "Character"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "SuicideKingList" ADD CONSTRAINT "SuicideKingList_characterId_fkey" FOREIGN KEY ("characterId") REFERENCES "Character"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "PriorityList" ADD CONSTRAINT "PriorityList_characterId_fkey" FOREIGN KEY ("characterId") REFERENCES "Character"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "SuicideKingListHistory" ADD CONSTRAINT "SuicideKingListHistory_characterId_fkey" FOREIGN KEY ("characterId") REFERENCES "Character"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "PriorityListHistory" ADD CONSTRAINT "PriorityListHistory_characterId_fkey" FOREIGN KEY ("characterId") REFERENCES "Character"("id") ON DELETE CASCADE ON UPDATE CASCADE;

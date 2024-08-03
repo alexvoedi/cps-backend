@@ -1,5 +1,9 @@
 {
   "yaml.schemas": {
     "https://json.schemastore.org/github-workflow.json": "file:///e%3A/Repositories/github.com/alexvoedi/cps-backend/.github/workflows/deploy.yml"
+  },
+  "sonarlint.connectedMode.project": {
+    "connectionId": "ubuntu-server",
+    "projectKey": "cps-backend"
   }
 }

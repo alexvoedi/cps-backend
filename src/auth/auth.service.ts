@@ -35,14 +35,7 @@ export class AuthService {
       expiresIn: `${this.configService.get('JWT_EXPIRATION_TIME')}s`,
     });
 
-    const baseUrl = this.configService.get('BASE_URL');
-
-    const isLocalhost =
-      baseUrl.includes('localhost') || baseUrl.includes('127.0.0.1');
-    const sameSite = 'None';
-    const secure = isLocalhost ? 'Secure' : 'Secure';
-
-    const cookie = `Authentication=${token}; Path=/; Max-Age=${this.configService.get('JWT_EXPIRATION_TIME')}; SameSite=${sameSite}; ${secure}`;
+    const cookie = `Authentication=${token}; Path=/; Max-Age=${this.configService.get('JWT_EXPIRATION_TIME')}; SameSite=None; Secure`;
 
     return cookie;
   }
@@ -55,14 +48,7 @@ export class AuthService {
       expiresIn: `${this.configService.get('JWT_REFRESH_TOKEN_EXPIRATION_TIME')}s`,
     });
 
-    const baseUrl = this.configService.get('BASE_URL');
-
-    const isLocalhost =
-      baseUrl.includes('localhost') || baseUrl.includes('127.0.0.1');
-    const sameSite = 'None';
-    const secure = isLocalhost ? 'Secure' : 'Secure';
-
-    const cookie = `Refresh=${token}; Path=/; Max-Age=${this.configService.get('JWT_REFRESH_TOKEN_EXPIRATION_TIME')}; SameSite=${sameSite}; ${secure}`;
+    const cookie = `Refresh=${token}; Path=/; Max-Age=${this.configService.get('JWT_REFRESH_TOKEN_EXPIRATION_TIME')}; SameSite=None; Secure`;
 
     return {
       cookie,

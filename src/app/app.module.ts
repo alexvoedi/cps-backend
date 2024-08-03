@@ -7,7 +7,7 @@ import { AuthModule } from 'src/auth/auth.module';
 import { GoogleAuthModule } from 'src/auth/google/google-auth.module';
 import { CharacterModule } from 'src/character/character.module';
 import { HealthModule } from 'src/health/health.module';
-import { SuicideKingModule } from 'src/suicide-king/suicide-king.module';
+import { PriorityListModule } from 'src/priority-list/priority-list.module';
 import { UserModule } from 'src/user/user.module';
 
 @Module({
@@ -61,7 +61,7 @@ import { UserModule } from 'src/user/user.module';
     }),
     UserModule,
     CharacterModule,
-    SuicideKingModule,
+    PriorityListModule,
   ],
   controllers: [],
   providers: [],
