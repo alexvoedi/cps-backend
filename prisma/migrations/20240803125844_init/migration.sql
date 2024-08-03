@@ -8,7 +8,7 @@ CREATE TYPE "CharacterClass" AS ENUM ('Warrior', 'Paladin', 'Hunter', 'Rogue', '
 CREATE TYPE "CharacterRole" AS ENUM ('Tank', 'Healer', 'Damage');
 
 -- CreateEnum
-CREATE TYPE "ListType" AS ENUM ('Priority', 'TSet');
+CREATE TYPE "ListType" AS ENUM ('Item', 'TSet');
 
 -- CreateTable
 CREATE TABLE "User" (
