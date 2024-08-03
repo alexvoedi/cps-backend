@@ -2,7 +2,7 @@ FROM node:22-alpine AS base
 
 USER root
 
-RUN npm install --ignore-scripts -g pnpm
+RUN npm install -g pnpm
 
 RUN mkdir -p /app && chown -R node:node /app
 
@@ -22,7 +22,7 @@ COPY package.json pnpm-lock.yaml tsconfig.json ./
 # ---
 
 FROM base AS prod-deps
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile --ignore-scripts
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
 
 # ---
 
