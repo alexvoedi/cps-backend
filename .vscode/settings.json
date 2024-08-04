@@ -6,4 +6,5 @@
     "connectionId": "ubuntu-server",
     "projectKey": "cps-backend"
   },
+  "eslint.useFlatConfig": false
 }
