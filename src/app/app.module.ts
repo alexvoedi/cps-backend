@@ -16,6 +16,7 @@ import { UserModule } from 'src/user/user.module';
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema: Joi.object({
+        BASE_URL: Joi.string().uri().required(),
         POSTGRES_USER: Joi.string().required(),
         POSTGRES_PASSWORD: Joi.string().min(16).required(),
         POSTGRES_DB: Joi.string().required(),
@@ -50,7 +51,7 @@ import { UserModule } from 'src/user/user.module';
         },
       },
       defaults: {
-        from: 'CPS <noreply@cps.nekatz.com>',
+        from: `cohors praetoria spei <${process.env.MAIL_USER}>`,
       },
       preview: process.env.NODE_ENV !== 'production',
     }),

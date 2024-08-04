@@ -115,7 +115,6 @@ export class UserService {
       });
 
       await this.mailService.sendMail({
-        from: 'CPS Website',
         to: this.configService.get('ADMIN_EMAIL'),
         subject: 'Admin Account erstellt',
         text: `Admin-Account mit dem Passwort "${password}" wurde erstellt.`,
