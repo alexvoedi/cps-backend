@@ -26,6 +26,8 @@ import { UserModule } from 'src/user/user.module';
         JWT_REFRESH_TOKEN_SECRET: Joi.string().min(16).required(),
         JWT_EXPIRATION_TIME: Joi.number().required(),
         JWT_REFRESH_TOKEN_EXPIRATION_TIME: Joi.number().required(),
+        MAIL_HOST: Joi.string().required(),
+        MAIL_PORT: Joi.number().port().required(),
         MAIL_USER: Joi.string().required(),
         MAIL_PASS: Joi.string().required(),
         FRONTEND_URL: Joi.string().uri().required(),
@@ -39,10 +41,9 @@ import { UserModule } from 'src/user/user.module';
     GoogleAuthModule,
     MailerModule.forRoot({
       transport: {
-        service: 'gmail',
-        host: 'smpt.gmail.com',
-        port: 587,
-        secure: false,
+        host: process.env.MAIL_HOST,
+        port: Number(process.env.MAIL_PORT),
+        // secure: true,
         auth: {
           user: process.env.MAIL_USER,
           pass: process.env.MAIL_PASS,
