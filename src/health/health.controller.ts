@@ -24,10 +24,10 @@ export class HealthController {
     return this.health.check([
       () =>
         this.db.pingCheck('prisma', this.prisma, {
-          timeout: 60,
+          timeout: 1_000,
         }),
-      () => this.http.pingCheck('website', 'https://alexvoedi.github.io/cps/'),
-      () => this.memory.checkHeap('memory_heap', 150 * 1024 * 1024),
+      () => this.http.pingCheck('website', 'https://cps.nekatz.com/'),
+      () => this.memory.checkHeap('memory_heap', 256 * 1024 * 1024),
     ]);
   }
 }

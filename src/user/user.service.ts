@@ -1,17 +1,21 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { User, Prisma } from '@prisma/client';
+import { User, Prisma, UserRole } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UserService {
+  private readonly logger = new Logger(UserService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
     private readonly mailService: MailerService,
-  ) {}
+  ) {
+    this.createAdminUser();
+  }
 
   async getUser(
     userWhereUniqueInput: Prisma.UserWhereUniqueInput,
@@ -84,5 +88,54 @@ export class UserService {
       where: { id: userId },
       data: { currentHashedRefreshToken: null },
     });
+  }
+
+  isPasswordValid(user: User, password: string): boolean {
+    return bcrypt.compareSync(password, user.hashedPassword);
+  }
+
+  async createAdminUser() {
+    const adminExists = await this.prisma.user.findUnique({
+      where: {
+        email: this.configService.get('ADMIN_EMAIL'),
+        role: UserRole.Admin,
+      },
+    });
+
+    if (!adminExists) {
+      const password = this.generatePassword();
+
+      await this.prisma.user.create({
+        data: {
+          email: this.configService.get('ADMIN_EMAIL'),
+          name: 'Admin',
+          role: UserRole.Admin,
+          hashedPassword: bcrypt.hashSync(password, 10),
+        },
+      });
+
+      await this.mailService.sendMail({
+        from: 'CPS Website',
+        to: this.configService.get('ADMIN_EMAIL'),
+        subject: 'Admin Account erstellt',
+        text: `Admin-Account mit dem Passwort "${password}" wurde erstellt.`,
+      });
+
+      this.logger.log('New admin user created');
+    }
+  }
+
+  generatePassword(length = 16) {
+    const charset =
+      'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
+    let password = '';
+
+    for (let i = 0; i < length; i++) {
+      const at = Math.floor(Math.random() * charset.length);
+      password += charset.charAt(at);
+    }
+
+    return password;
   }
 }

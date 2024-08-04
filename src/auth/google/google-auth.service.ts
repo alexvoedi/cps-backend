@@ -1,6 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { User } from '@prisma/client';
 import { google, Auth } from 'googleapis';
 import { AuthService } from 'src/auth/auth.service';
 import { UserService } from 'src/user/user.service';
@@ -33,7 +32,7 @@ export class GoogleAuthService {
       return this.registerUser(token, email);
     }
 
-    return this.handleRegisteredUser(user);
+    return this.authService.handleRegisteredUser(user);
   }
 
   async verify(refreshToken: string) {
@@ -46,21 +45,6 @@ export class GoogleAuthService {
     return user;
   }
 
-  async handleRegisteredUser(user: User) {
-    if (!user) {
-      throw new UnauthorizedException('User not registered');
-    }
-
-    const { accessTokenCookie, refreshTokenCookie } =
-      await this.authService.getCookiesForUser(user);
-
-    return {
-      user,
-      accessTokenCookie,
-      refreshTokenCookie,
-    };
-  }
-
   async registerUser(token: string, email: string) {
     const { name } = await this.getUserData(token);
 
@@ -69,7 +53,7 @@ export class GoogleAuthService {
       name,
     });
 
-    return this.handleRegisteredUser(user);
+    return this.authService.handleRegisteredUser(user);
   }
 
   async getUserData(token: string) {

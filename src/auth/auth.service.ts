@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
 import { TokenPayload } from 'src/auth/auth.interface';
 import { UserService } from 'src/user/user.service';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -12,6 +13,37 @@ export class AuthService {
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
   ) {}
+
+  async authenticate(email: string, password: string) {
+    const user = await this.userService.getUser({ email });
+
+    if (!user) {
+      return null;
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.hashedPassword);
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    return await this.handleRegisteredUser(user);
+  }
+
+  async handleRegisteredUser(user: User) {
+    if (!user) {
+      throw new UnauthorizedException('User not registered');
+    }
+
+    const { accessTokenCookie, refreshTokenCookie } =
+      await this.getCookiesForUser(user);
+
+    return {
+      user,
+      accessTokenCookie,
+      refreshTokenCookie,
+    };
+  }
 
   async getCookiesForUser(user: User) {
     const accessTokenCookie = this.getCookieWithJwtToken(user);
