@@ -16,6 +16,7 @@ WORKDIR /app
 
 COPY src src
 COPY prisma prisma
+COPY scripts scripts
 COPY package.json pnpm-lock.yaml tsconfig.json ./
 
 
@@ -47,4 +48,4 @@ COPY --from=prisma /app/node_modules/@prisma/client /app/node_modules/@prisma/cl
 
 EXPOSE 3000
 
-CMD ["node", "dist/main.js"]
+CMD ["scripts/run.sh"]
