@@ -12,7 +12,6 @@ import { UserRole } from '@prisma/client';
 import { Server, Socket } from 'socket.io';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { PriorityListHistoryService } from 'src/priority-list/modules/priority-list-history/priority-list#-history.service';
-import { AddCharacterToListDto } from './dtos/add-character-to-list.dto';
 import { AddCharacterToPriorityListDto } from './dtos/add-character-to-priority-list.dto';
 import { MoveCharacterToEndDto } from './dtos/move-character-to-end.dto';
 import { MoveCharacterDto } from './dtos/move-character.dto';
