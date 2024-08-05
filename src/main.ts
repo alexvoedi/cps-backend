@@ -91,13 +91,12 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe());
 
-  await app.listen(3000, '0.0.0.0', (err, address) => {
+  await app.listen(3000, '0.0.0.0', (err) => {
     if (err) {
       console.error(err);
       process.exit(1);
     }
-
-    logger.log(`Server listening on ${address}`);
   });
 }
+
 bootstrap();

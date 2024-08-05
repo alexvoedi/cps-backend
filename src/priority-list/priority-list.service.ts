@@ -26,12 +26,6 @@ export class PriorityListService {
     });
   }
 
-  async addCharacterToRaid(data: Prisma.PriorityListUncheckedCreateInput) {
-    return await this.prisma.priorityList.create({
-      data,
-    });
-  }
-
   async getCharacterByIdOrThrow(characterId: string) {
     const character = await this.prisma.priorityList.findUnique({
       where: {
@@ -181,10 +175,7 @@ export class PriorityListService {
     return range;
   }
 
-  async addCharacterToPriorityList({
-    listType,
-    ...dto
-  }: AddCharacterToPriorityListDto) {
+  async addToPriorityList({ listType, ...dto }: AddCharacterToPriorityListDto) {
     const character = await this.prisma.priorityList.findUnique({
       where: {
         characterId: dto.characterId,

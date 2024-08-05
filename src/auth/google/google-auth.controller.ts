@@ -27,6 +27,9 @@ export class GoogleAuthController {
 
     response.header('Set-Cookie', [accessTokenCookie, refreshTokenCookie]);
 
+    delete user.currentHashedRefreshToken;
+    delete user.hashedPassword;
+
     return user;
   }
 
@@ -47,6 +50,9 @@ export class GoogleAuthController {
     if (!user.currentHashedRefreshToken) {
       throw new UnauthorizedException('User not logged in');
     }
+
+    delete user.currentHashedRefreshToken;
+    delete user.hashedPassword;
 
     return user;
   }

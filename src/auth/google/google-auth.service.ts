@@ -26,7 +26,7 @@ export class GoogleAuthService {
 
     const { email } = tokenInfo;
 
-    const user = await this.userService.getUser({ email });
+    const user = await this.userService.getUserWithSecrets({ email });
 
     if (!user) {
       return this.registerUser(token, email);

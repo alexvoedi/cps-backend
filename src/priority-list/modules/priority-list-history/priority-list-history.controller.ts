@@ -1,5 +1,5 @@
 import { Controller, Get, ParseIntPipe, Query } from '@nestjs/common';
-import { PriorityListHistoryService } from 'src/priority-list-history/priority-list#-history.service';
+import { PriorityListHistoryService } from 'src/priority-list/modules/priority-list-history/priority-list#-history.service';
 
 @Controller('priority-list/history')
 export class PriorityHistoryController {

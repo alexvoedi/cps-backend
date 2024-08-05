@@ -4,6 +4,7 @@ import { User, Prisma, UserRole } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
+import { UserWithoutSecrets } from './types/UserWithoutSecrets';
 
 @Injectable()
 export class UserService {
@@ -19,13 +20,25 @@ export class UserService {
 
   async getUser(
     userWhereUniqueInput: Prisma.UserWhereUniqueInput,
+  ): Promise<UserWithoutSecrets | null> {
+    return this.prisma.user.findUnique({
+      where: userWhereUniqueInput,
+      omit: {
+        currentHashedRefreshToken: true,
+        hashedPassword: true,
+      },
+    });
+  }
+
+  async getUserWithSecrets(
+    userWhereUniqueInput: Prisma.UserWhereUniqueInput,
   ): Promise<User | null> {
     return this.prisma.user.findUnique({
       where: userWhereUniqueInput,
     });
   }
 
-  async getUsers(params: {
+  async getUsers(params?: {
     skip?: number;
     take?: number;
     cursor?: Prisma.UserWhereUniqueInput;

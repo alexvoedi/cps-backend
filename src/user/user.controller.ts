@@ -6,7 +6,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  getAllUsers() {
-    return this.userService.getUsers({});
+  getUsers() {
+    return this.userService.getUsers();
   }
 }

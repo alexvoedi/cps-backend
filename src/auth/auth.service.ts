@@ -15,7 +15,7 @@ export class AuthService {
   ) {}
 
   async authenticate(email: string, password: string) {
-    const user = await this.userService.getUser({ email });
+    const user = await this.userService.getUserWithSecrets({ email });
 
     if (!user) {
       return null;
@@ -96,7 +96,7 @@ export class AuthService {
   }
 
   async getUserFromToken(token: string) {
-    const user = await this.userService.getUser({
+    const user = await this.userService.getUserWithSecrets({
       id: await this.getUserIdFromToken(token),
     });
 

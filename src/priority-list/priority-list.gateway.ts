@@ -11,7 +11,7 @@ import {
 import { UserRole } from '@prisma/client';
 import { Server, Socket } from 'socket.io';
 import { Roles } from 'src/auth/decorators/roles.decorator';
-import { PriorityListHistoryService } from 'src/priority-list-history/priority-list#-history.service';
+import { PriorityListHistoryService } from 'src/priority-list/modules/priority-list-history/priority-list#-history.service';
 import { AddCharacterToListDto } from './dtos/add-character-to-list.dto';
 import { AddCharacterToPriorityListDto } from './dtos/add-character-to-priority-list.dto';
 import { MoveCharacterToEndDto } from './dtos/move-character-to-end.dto';
@@ -64,16 +64,17 @@ export class PriorityListGateway
     this.logger.log(`Client disconnected: ${client.id}`);
   }
 
-  @SubscribeMessage('add-character-to-list')
-  async addCharacterToRaid(
+  @Roles([UserRole.RaidLead])
+  @SubscribeMessage('priority-list:add')
+  async addToPriorityList(
     @MessageBody({
       transform: (value) => JSON.parse(value),
     })
-    body: AddCharacterToListDto,
+    body: AddCharacterToPriorityListDto,
   ) {
-    this.logger.verbose(`add-character-to-list: ${JSON.stringify(body)}`);
+    this.logger.verbose(`add-to-priority-list: ${JSON.stringify(body)}`);
 
-    const result = await this.priorityListService.addCharacterToRaid(body);
+    const result = await this.priorityListService.addToPriorityList(body);
 
     this.server.emit('update-priority-list', result);
     this.server.emit(
@@ -83,14 +84,14 @@ export class PriorityListGateway
   }
 
   @Roles([UserRole.RaidLead])
-  @SubscribeMessage('move-character')
+  @SubscribeMessage('priority-list:move')
   async moveCharacter(
     @MessageBody({
       transform: (value) => JSON.parse(value),
     })
     body: MoveCharacterDto,
   ) {
-    this.logger.verbose(`move-character: ${JSON.stringify(body)}`);
+    this.logger.verbose(`move: ${JSON.stringify(body)}`);
 
     const result = await this.priorityListService.moveCharacter(body);
 
@@ -101,27 +102,9 @@ export class PriorityListGateway
     );
   }
 
-  @SubscribeMessage('add-to-priority-list')
-  async addCharacterToPriority(
-    @MessageBody({
-      transform: (value) => JSON.parse(value),
-    })
-    body: AddCharacterToPriorityListDto,
-  ) {
-    this.logger.verbose(`add-to-priority-list: ${JSON.stringify(body)}`);
-
-    const result =
-      await this.priorityListService.addCharacterToPriorityList(body);
-
-    this.server.emit('update-priority-list', result);
-    this.server.emit(
-      'add-priority-list-history-entry',
-      await this.priorityListHistoryService.getNewestEntry(),
-    );
-  }
-
-  @SubscribeMessage('move-to-end')
-  async moveCharacterToEnd(
+  @Roles([UserRole.RaidLead])
+  @SubscribeMessage('priority-list:move-to-end')
+  async moveToEnd(
     @MessageBody({
       transform: (value) => JSON.parse(value),
     })
@@ -138,7 +121,8 @@ export class PriorityListGateway
     );
   }
 
-  @SubscribeMessage('set-character-inactive')
+  @Roles([UserRole.RaidLead])
+  @SubscribeMessage('priority-list:set-activity')
   async setCharacterInactive(
     @MessageBody({
       transform: (value) => JSON.parse(value),
@@ -150,23 +134,6 @@ export class PriorityListGateway
     const result = await this.priorityListService.setCharacterActive(
       body,
       false,
-    );
-
-    this.server.emit('update-priority-list', result);
-  }
-
-  @SubscribeMessage('set-character-active')
-  async setCharacterActive(
-    @MessageBody({
-      transform: (value) => JSON.parse(value),
-    })
-    body: SetCharacterInactiveDto,
-  ) {
-    this.logger.verbose(`set-character-active: ${JSON.stringify(body)}`);
-
-    const result = await this.priorityListService.setCharacterActive(
-      body,
-      true,
     );
 
     this.server.emit('update-priority-list', result);
