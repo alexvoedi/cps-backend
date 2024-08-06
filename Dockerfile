@@ -16,6 +16,7 @@ WORKDIR /app
 
 COPY src src
 COPY prisma prisma
+COPY data data
 COPY package.json pnpm-lock.yaml tsconfig.json ./
 
 
