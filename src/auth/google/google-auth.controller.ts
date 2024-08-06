@@ -34,14 +34,18 @@ export class GoogleAuthController {
   }
 
   @Post('verify')
-  async verify(@Req() { cookies }: FastifyRequest) {
+  async verify(
+    @Req() { cookies }: FastifyRequest,
+    @Res({ passthrough: true }) response: FastifyReply,
+  ) {
     const { Refresh: refreshToken } = cookies;
 
     if (!refreshToken) {
       throw new UnauthorizedException('Missing credentials');
     }
 
-    const user = await this.googleAuthService.verify(refreshToken);
+    const { user, accessTokenCookie, refreshTokenCookie } =
+      await this.googleAuthService.verify(refreshToken);
 
     if (!user) {
       throw new UnauthorizedException('User not registered');
@@ -50,6 +54,8 @@ export class GoogleAuthController {
     if (!user.currentHashedRefreshToken) {
       throw new UnauthorizedException('User not logged in');
     }
+
+    response.header('Set-Cookie', [accessTokenCookie, refreshTokenCookie]);
 
     delete user.currentHashedRefreshToken;
     delete user.hashedPassword;

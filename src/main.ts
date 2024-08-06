@@ -91,11 +91,13 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe());
 
-  await app.listen(3000, '0.0.0.0', (err) => {
+  await app.listen(process.env.PORT, '0.0.0.0', (err, address) => {
     if (err) {
       console.error(err);
       process.exit(1);
     }
+
+    logger.log(`Server running on ${address}`, 'NestApplication');
   });
 }
 

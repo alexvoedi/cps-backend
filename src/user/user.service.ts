@@ -38,7 +38,7 @@ export class UserService {
     });
   }
 
-  async getUsers(params?: {
+  async getUsers(params: {
     skip?: number;
     take?: number;
     cursor?: Prisma.UserWhereUniqueInput;
@@ -75,10 +75,15 @@ export class UserService {
     data: Prisma.UserUpdateInput;
   }): Promise<User> {
     const { where, data } = params;
-    return this.prisma.user.update({
+    const user = await this.prisma.user.update({
       data,
       where,
     });
+
+    delete user.hashedPassword;
+    delete user.currentHashedRefreshToken;
+
+    return user;
   }
 
   async deleteUser(where: Prisma.UserWhereUniqueInput): Promise<User> {
@@ -90,7 +95,7 @@ export class UserService {
   async setCurrentRefreshToken(refreshToken: string, userId: string) {
     const currentHashedRefreshToken = await bcrypt.hash(refreshToken, 10);
 
-    await this.prisma.user.update({
+    return await this.prisma.user.update({
       where: { id: userId },
       data: { currentHashedRefreshToken },
     });

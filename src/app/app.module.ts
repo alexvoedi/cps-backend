@@ -11,12 +11,13 @@ import { CharacterModule } from 'src/character/character.module';
 import { HealthModule } from 'src/health/health.module';
 import { PriorityListModule } from 'src/priority-list/priority-list.module';
 import { UserModule } from 'src/user/user.module';
+import { XModule } from 'src/x/x.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema: Joi.object({
-        BASE_URL: Joi.string().uri().required(),
+        PORT: Joi.number().port().required(),
         POSTGRES_USER: Joi.string().required(),
         POSTGRES_PASSWORD: Joi.string().min(16).required(),
         POSTGRES_DB: Joi.string().required(),
@@ -64,6 +65,7 @@ import { UserModule } from 'src/user/user.module';
     UserModule,
     CharacterModule,
     PriorityListModule,
+    XModule,
   ],
   controllers: [],
   providers: [

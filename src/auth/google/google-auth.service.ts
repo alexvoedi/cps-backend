@@ -42,7 +42,7 @@ export class GoogleAuthService {
       throw new UnauthorizedException('User not registered');
     }
 
-    return user;
+    return this.authService.handleRegisteredUser(user);
   }
 
   async registerUser(token: string, email: string) {
