@@ -19,6 +19,7 @@ function createWinstonLogger() {
   return WinstonModule.createLogger({
     transports: [
       new transports.Console({
+        level: 'verbose',
         format: format.combine(
           format.timestamp({
             format: 'YYYY-MM-DD HH:mm:ss.SSS',

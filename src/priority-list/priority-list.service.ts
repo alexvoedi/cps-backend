@@ -10,7 +10,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { AddCharacterToPriorityListDto } from './dtos/add-character-to-priority-list.dto';
 import { MoveCharacterToEndDto } from './dtos/move-character-to-end.dto';
 import { MoveCharacterDto } from './dtos/move-character.dto';
-import { SetCharacterInactiveDto } from './dtos/set-character-active.dto';
+import { SetCharacterActiveDto } from './dtos/set-character-active.dto';
 
 @Injectable()
 export class PriorityListService {
@@ -256,7 +256,7 @@ export class PriorityListService {
     return listType === ListType.Item ? 'position' : 'tSetPosition';
   }
 
-  async setCharacterActive(dto: SetCharacterInactiveDto, active: boolean) {
+  async setCharacterActive(dto: SetCharacterActiveDto) {
     await this.getCharacterByIdOrThrow(dto.characterId);
 
     await this.prisma.priorityList.update({
@@ -264,7 +264,7 @@ export class PriorityListService {
         characterId: dto.characterId,
       },
       data: {
-        active,
+        active: dto.active,
       },
     });
 

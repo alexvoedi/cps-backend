@@ -61,7 +61,6 @@ export class UserService {
     });
 
     this.mailService.sendMail({
-      from: 'CPS Website',
       to: 'voedisch.alexander@gmail.com',
       subject: 'Neuer Nutzer | CPS',
       text: `Ein neuer Nutzer hat sich auf der CPS Webseite registriert. Besuche jetzt ${this.configService.get('FRONTEND_URL')} um dem Nutzer eine Rolle zuzuweisen.`,

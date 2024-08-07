@@ -15,8 +15,10 @@ import { PriorityListHistoryService } from 'src/priority-list/modules/priority-l
 import { AddCharacterToPriorityListDto } from './dtos/add-character-to-priority-list.dto';
 import { MoveCharacterToEndDto } from './dtos/move-character-to-end.dto';
 import { MoveCharacterDto } from './dtos/move-character.dto';
-import { SetCharacterInactiveDto } from './dtos/set-character-active.dto';
+import { SetCharacterActiveDto } from './dtos/set-character-active.dto';
 import { PriorityListService } from './priority-list.service';
+import { ClientCommand } from './enums/ClientCommand';
+import { ServerCommand } from './enums/ServerCommand';
 
 @WebSocketGateway({
   namespace: 'priority-list',
@@ -53,8 +55,8 @@ export class PriorityListGateway
         take: 10,
       });
 
-    client.emit('update-priority-list', priorityList);
-    client.emit('update-priority-list-history', priorityListHistory);
+    client.emit('priority-list:update', priorityList);
+    client.emit('priority-list-history:update', priorityListHistory);
 
     this.logger.log(`Client connected: ${client.id}`);
   }
@@ -64,7 +66,7 @@ export class PriorityListGateway
   }
 
   @Roles([UserRole.RaidLead])
-  @SubscribeMessage('priority-list:add')
+  @SubscribeMessage(ServerCommand.PriorityList_Add)
   async addToPriorityList(
     @MessageBody({
       transform: (value) => JSON.parse(value),
@@ -73,17 +75,15 @@ export class PriorityListGateway
   ) {
     this.logger.verbose(`add-to-priority-list: ${JSON.stringify(body)}`);
 
-    const result = await this.priorityListService.addToPriorityList(body);
+    const priorityList = await this.priorityListService.addToPriorityList(body);
+    const historyEntry = await this.priorityListHistoryService.getNewestEntry();
 
-    this.server.emit('update-priority-list', result);
-    this.server.emit(
-      'add-priority-list-history-entry',
-      await this.priorityListHistoryService.getNewestEntry(),
-    );
+    this.server.emit(ClientCommand.PriorityList_Update, priorityList);
+    this.server.emit(ClientCommand.PriorityListHistory_Add, historyEntry);
   }
 
   @Roles([UserRole.RaidLead])
-  @SubscribeMessage('priority-list:move')
+  @SubscribeMessage(ServerCommand.PriorityList_Move)
   async moveCharacter(
     @MessageBody({
       transform: (value) => JSON.parse(value),
@@ -92,17 +92,15 @@ export class PriorityListGateway
   ) {
     this.logger.verbose(`move: ${JSON.stringify(body)}`);
 
-    const result = await this.priorityListService.moveCharacter(body);
+    const priorityList = await this.priorityListService.moveCharacter(body);
+    const historyEntry = await this.priorityListHistoryService.getNewestEntry();
 
-    this.server.emit('update-priority-list', result);
-    this.server.emit(
-      'add-priority-list-history-entry',
-      await this.priorityListHistoryService.getNewestEntry(),
-    );
+    this.server.emit(ClientCommand.PriorityList_Update, priorityList);
+    this.server.emit(ClientCommand.PriorityListHistory_Add, historyEntry);
   }
 
   @Roles([UserRole.RaidLead])
-  @SubscribeMessage('priority-list:move-to-end')
+  @SubscribeMessage(ServerCommand.PriorityList_MoveToEnd)
   async moveToEnd(
     @MessageBody({
       transform: (value) => JSON.parse(value),
@@ -111,30 +109,29 @@ export class PriorityListGateway
   ) {
     this.logger.verbose(`move-to-end: ${JSON.stringify(body)}`);
 
-    const result = await this.priorityListService.moveCharacterToEnd(body);
+    const priorityList =
+      await this.priorityListService.moveCharacterToEnd(body);
+    const historyEntry = await this.priorityListHistoryService.getNewestEntry();
 
-    this.server.emit('update-priority-list', result);
-    this.server.emit(
-      'add-priority-list-history-entry',
-      await this.priorityListHistoryService.getNewestEntry(),
-    );
+    this.server.emit(ClientCommand.PriorityList_Update, priorityList);
+    this.server.emit(ClientCommand.PriorityListHistory_Add, historyEntry);
   }
 
   @Roles([UserRole.RaidLead])
-  @SubscribeMessage('priority-list:set-activity')
-  async setCharacterInactive(
+  @SubscribeMessage(ServerCommand.PriorityList_SetActive)
+  async toggleCharacterActive(
     @MessageBody({
       transform: (value) => JSON.parse(value),
     })
-    body: SetCharacterInactiveDto,
+    body: SetCharacterActiveDto,
   ) {
     this.logger.verbose(`set-character-inactive: ${JSON.stringify(body)}`);
 
-    const result = await this.priorityListService.setCharacterActive(
-      body,
-      false,
-    );
+    const priorityList =
+      await this.priorityListService.setCharacterActive(body);
+    const historyEntry = await this.priorityListHistoryService.getNewestEntry();
 
-    this.server.emit('update-priority-list', result);
+    this.server.emit(ClientCommand.PriorityList_Update, priorityList);
+    this.server.emit(ClientCommand.PriorityListHistory_Add, historyEntry);
   }
 }
